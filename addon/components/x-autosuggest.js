@@ -74,7 +74,7 @@ export default Ember.Component.extend({
   _queryPromise: function(query){
     let source = get(this, 'source'),
         searchPath = get(this, 'searchPath'),
-        store = this.container.lookup('store:main');
+        store = this.container.lookup('service:store');
 
     return new Ember.RSVP.Promise(function(resolve, reject){
       if(typeof source === "string"){
@@ -84,7 +84,7 @@ export default Ember.Component.extend({
 
         queryExpression[searchPath] = query;
 
-        return store.findAll(source, queryExpression).then(resolve, reject);
+        return store.query(source, queryExpression).then(resolve, reject);
       }
       else if(source.then){
         source.then(resolve, reject);
