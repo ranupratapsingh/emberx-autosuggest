@@ -2,12 +2,29 @@
   {{#each destination key="@index" as |selection|}}
     <li class="selection">
       <a class="as-close" {{action "removeSelection" selection}}>x</a>
-      {{yield selection}}
-      {{display-helper selection searchPath}}
+      {{#if hasBlock}}
+        {{yield selection}}
+      {{else}}
+        {{display-helper selection searchPath}}
+      {{/if}}
     </li>
   {{/each}}
   <li>
-    <input type="text" {{action "removeFocus" on="focus-out"}} class="autosuggest"/>
+    <section class='as-container'>
+      {{#unless multiple}}
+        {{#if selection}}
+        <span class="as-selected">
+          {{#if hasBlock}}
+            {{yield selection}}
+          {{else}}
+            {{display-helper selection searchPath}}
+          {{/if}}
+          <a class="as-close" {{action "removeSelection" selection}}>x</a>
+        </span>
+        {{/if}}
+      {{/unless}}
+      {{input focus-out="removeFocus" class="as-input" placeholder=placeHolder }}
+    </section>
   </li>
 </ul>
 <div class="results {{unless hasQuery 'hdn'}}">
@@ -15,8 +32,11 @@
     {{#each displayResults key="@index" as |result|}}
       <li {{action "addSelection" result}} class="result {{if result.active 'active'}}">
         <span class="result-name">
-          {{yield result}}
-          {{display-helper result searchPath}}
+          {{#if hasBlock}}
+            {{yield result}}
+          {{else}}
+            {{display-helper result searchPath}}
+          {{/if}}
         </span>
       </li>
     {{else}}

@@ -19,30 +19,42 @@ export default Ember.Component.extend({
   actions: {
     addSelection: function(selection){
       set(this, 'query', '');
-      get(this, 'destination').addObject(selection);
+      if(this.get('multiple'))
+        get(this, 'destination').addObject(selection);
+      else
+        set(this, 'selection', selection);
       set(this, 'selectionIndex', -1);
       set(this, 'query', '');
       this.$('input[type=text]').val('').focus();
     },
 
     removeSelection: function(item){
-      get(this, 'destination').removeObject(item);
+      if(this.get('multiple'))
+        get(this, 'destination').removeObject(item);
+      else
+        set(this, 'selection', null);
     },
 
     removeFocus: function() {
-      setTimeout(this.hideResults, 200);
+      Ember.run.later(this, this.hideResults, this.get('reactionTime'));
     }
   },
 
-  classNameBindings: [':autosuggest'],
+  classNameBindings: [':autosuggest', 'multiple'],
   minChars: 1,
   searchPath: 'name',
+  reactionTime: 300,
   query: null,
+  multiple: true,
+  placeHolder: 'Type to Select',
   selectionIndex: -1,
 
   _initialize: Ember.on('init', function() {
     this._super.apply(this, arguments);
     set(this, 'displayResults', Ember.A());
+    if(!get(this, 'multiple')){
+      set(this, 'destination', Ember.A());
+    }
 
     this.keyFunctionMap = {};
 
@@ -238,7 +250,7 @@ export default Ember.Component.extend({
     this.send('addSelection', active);
   },
 
-  input: function(e) {
+  processInput: function(e) {
     let query = e.target.value || '',
         displayResults = get(this, 'displayResults'),
         minChars = get(this, 'minChars'),
@@ -259,6 +271,10 @@ export default Ember.Component.extend({
     });
   },
 
+  input: function(event){
+    Ember.run.debounce(this, this.processInput, event, this.get('reactionTime'));
+  },
+
 
   keyDown: function(e){
     let keyCode = e.keyCode;
@@ -272,5 +288,5 @@ export default Ember.Component.extend({
     e.preventDefault();
     e.stopPropagation();
     return false;
-  },
+  }
 });
