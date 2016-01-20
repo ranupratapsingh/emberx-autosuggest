@@ -44,6 +44,7 @@ export default Ember.Component.extend({
   minChars: 1,
   searchPath: 'name',
   reactionTime: 300,
+  clientFilter: true,
   query: null,
   multiple: true,
   placeHolder: 'Type to Select',
@@ -121,11 +122,18 @@ export default Ember.Component.extend({
         searchPath = get(this, 'searchPath'),
         destination = get(this, 'destination');
 
-    let results = source.filter((item) => {
-      return item.get(searchPath).toLowerCase().search(query.toLowerCase()) !== -1;
-    }).filter((item) => {
-      return !destination.contains(item);
-    });
+    let results;
+    if(this.get('clientFilter')){
+      results = source.filter((item) => {
+        return item.get(searchPath).toLowerCase().search(query.toLowerCase()) !== -1;
+      }).filter((item) => {
+        return !destination.contains(item);
+      });
+    }
+    else
+    {
+      results = source.toArray();
+    }
 
     if(!results.length) {
       return displayResults.clear();
